@@ -122,11 +122,11 @@ export default function Index() { // Renamed Landing to Index
       features: ['Interactive Matrix Operations', 'Step-by-step Calculations', 'Core Transformer Concept']
     },
     {
-      id: 'multi-head-attention', // Placeholder for next phase
-      title: 'Multi-Head Attention',
-      description: 'Coming Soon: Explore how multiple attention "heads" capture diverse relationships in parallel.',
+      id: 'multi-head-attention',
+      title: 'Multi-Head Attention Mechanism (3 Heads)',
+      description: 'Explore how multiple attention "heads" capture diverse relationships in parallel, enhancing model capacity.',
       icon: Cpu,
-      status: 'coming-soon',
+      status: 'available',
       gradient: 'from-emerald-500 to-teal-500',
       features: ['Parallel Processing', 'Diverse Representations', 'Enhanced Context Understanding']
     },

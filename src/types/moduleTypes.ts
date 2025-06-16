@@ -16,4 +16,11 @@ export type NeuralNetworkStep =
   | "dz2" | "dw2" | "db2" 
   | "dz1" | "dw1" | "db1";
 
+// Types for multi-head attention module
+export type MultiHeadAttentionStep = 
+  | "input" 
+  | "q" | "k" | "v" 
+  | "scores" | "softmax" 
+  | "output";
+
 // Types for other modules can be added here as your application grows

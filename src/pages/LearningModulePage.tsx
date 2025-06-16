@@ -6,13 +6,12 @@ import { useTheme } from '@/contexts/ThemeContext';
 // Define module components using React.lazy for code splitting
 const SelfAttentionModule = lazy(() => import('@/components/modules/self-attention/SelfAttentionModule'));
 const NeuralNetworkModule = lazy(() => import('@/components/modules/neural-network/NeuralNetworkModule'));
-// Example for future:
-// const MultiHeadAttentionModule = lazy(() => import('@/components/modules/multi-head-attention/MultiHeadAttentionModule'));
+const MultiHeadAttentionModule = lazy(() => import('@/components/modules/multi-head-attention/MultiHeadAttentionModule'));
 
-const moduleComponents: { [key: string]: React.LazyExoticComponent<React.FC<{}>> } = {
+const moduleComponents: { [key: string]: React.LazyExoticComponent<React.ComponentType<any>> } = {
   'self-attention': SelfAttentionModule,
   'neural-network': NeuralNetworkModule,
-  // 'multi-head-attention': MultiHeadAttentionModule, // Will be uncommented later
+  'multi-head-attention': MultiHeadAttentionModule,
 };
 
 const LearningModulePage = () => {
