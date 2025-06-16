@@ -131,13 +131,13 @@ export default function Index() { // Renamed Landing to Index
       features: ['Parallel Processing', 'Diverse Representations', 'Enhanced Context Understanding']
     },
     {
-      id: 'neural-network-bp', // Placeholder
-      title: 'Neural Network Backpropagation',
-      description: 'Coming Soon: Visualize how neural networks learn by adjusting weights through backpropagation.',
+      id: 'neural-network',
+      title: 'Neural Network Epoch Training',
+      description: 'Visualize and understand how neural networks learn through forward propagation and backpropagation in a single training epoch.',
       icon: Network,
-      status: 'coming-soon',
+      status: 'available',
       gradient: 'from-red-500 to-orange-500',
-      features: ['Gradient Calculation', 'Weight Updates', 'Loss Minimization']
+      features: ['Forward Pass Calculation', 'Gradient Computation', 'Backpropagation Visualization']
     },
      {
       id: 'word2vec-cbow', // Placeholder
