@@ -1,4 +1,4 @@
-import type { Step } from '@/components/SelfAttentionApp';
+import type { SelfAttentionStep as Step } from '@/types/moduleTypes';
 
 // New Matrix data
 export const INPUT_MATRIX = [

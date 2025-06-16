@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { getEducationalContent } from '@/utils/educationalContent';
-import type { Step } from '@/components/SelfAttentionApp';
+import type { SelfAttentionStep as Step } from '@/types/moduleTypes';
 
 interface EducationalSidebarProps {
   currentStep: Step;

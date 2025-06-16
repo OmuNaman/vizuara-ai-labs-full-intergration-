@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import type { Step } from '@/components/SelfAttentionApp';
+import type { SelfAttentionStep as Step } from '@/types/moduleTypes';
 
 interface StepNavigationProps {
   steps: Step[];

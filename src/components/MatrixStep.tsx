@@ -7,7 +7,7 @@ import { MatrixInput } from '@/components/MatrixInput';
 import { getStepData, calculateExpected, validateMatrix } from '@/utils/matrixCalculations';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkles, CheckCircle } from 'lucide-react';
-import type { Step } from '@/components/SelfAttentionApp';
+import type { SelfAttentionStep as Step } from '@/types/moduleTypes';
 
 interface MatrixStepProps {
   step: Step;
