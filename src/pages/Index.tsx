@@ -1,7 +1,7 @@
 // vizuara-ai-learning-lab-main/src/pages/Index.tsx
 import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
@@ -140,11 +140,11 @@ export default function Index() { // Renamed Landing to Index
       features: ['Forward Pass Calculation', 'Gradient Computation', 'Backpropagation Visualization']
     },
      {
-      id: 'word2vec-cbow', // Placeholder
+      id: 'word2vec', // Using the id that matches the moduleComponents registration
       title: 'Word2Vec (CBOW)',
-      description: 'Coming Soon: See how words are mapped to vectors and explore semantic relationships.',
-      icon: BookOpenCheck, // Using new icon
-      status: 'coming-soon',
+      description: 'Explore how words are mapped to vector space and learn to visualize semantic relationships between words.',
+      icon: BookOpenCheck, // Using book icon
+      status: 'available',
       gradient: 'from-yellow-500 to-amber-500',
       features: ['Vector Embeddings', 'Semantic Arithmetic', 'Contextual Prediction']
     }
@@ -211,10 +211,16 @@ export default function Index() { // Renamed Landing to Index
             <motion.p className={`text-xl md:text-2xl mb-6 ${isDark ? 'text-slate-300' : 'text-slate-600'}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
               Put your knowledge to the test with interactive practice modules!
             </motion.p>
-             <Button onClick={() => handleModuleClick('self-attention', 'available')} size="lg" className="px-8 py-6 text-lg rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl shadow-blue-500/20 group mt-6">
-                Explore Self-Attention
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button onClick={() => handleModuleClick('self-attention', 'available')} size="lg" className="px-8 py-6 text-lg rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl shadow-blue-500/20 group mt-6">
+                  Explore Self-Attention
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button onClick={() => handleModuleClick('word2vec', 'available')} size="lg" className="px-8 py-6 text-lg rounded-lg bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white font-semibold transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl shadow-yellow-500/20 group mt-6">
+                  Try Word2Vec
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       </section>

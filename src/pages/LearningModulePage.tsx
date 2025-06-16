@@ -7,11 +7,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 const SelfAttentionModule = lazy(() => import('@/components/modules/self-attention/SelfAttentionModule'));
 const NeuralNetworkModule = lazy(() => import('@/components/modules/neural-network/NeuralNetworkModule'));
 const MultiHeadAttentionModule = lazy(() => import('@/components/modules/multi-head-attention/MultiHeadAttentionModule'));
+const Word2VecModule = lazy(() => import('@/components/modules/word2vec/components/Word2VecModule'));
 
 const moduleComponents: { [key: string]: React.LazyExoticComponent<React.ComponentType<any>> } = {
   'self-attention': SelfAttentionModule,
   'neural-network': NeuralNetworkModule,
   'multi-head-attention': MultiHeadAttentionModule,
+  'word2vec': Word2VecModule,
 };
 
 const LearningModulePage = () => {

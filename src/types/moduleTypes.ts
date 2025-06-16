@@ -23,4 +23,21 @@ export type MultiHeadAttentionStep =
   | "scores" | "softmax" 
   | "output";
 
+// Types for word2vec (CBOW) module
+export type Word2VecStep =
+  // Forward pass
+  | "context"
+  | "x-input"
+  | "hidden-layer"
+  | "output-layer"
+  | "prediction"
+  | "loss"
+  // Backward pass
+  | "dz"
+  | "dw2"
+  | "dh"
+  | "dw1"
+  | "w1-update"
+  | "w2-update";
+
 // Types for other modules can be added here as your application grows
