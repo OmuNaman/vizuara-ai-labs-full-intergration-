@@ -59,93 +59,116 @@ export function CalculationNode({ data, id }: CalculationNodeProps) {
   useEffect(() => {
     correctAudioRef.current = new Audio("/correct.mp3");
     wrongAudioRef.current = new Audio("/wrong.mp3");
-
-    if (correctAudioRef.current) correctAudioRef.current.load();
-    if (wrongAudioRef.current) wrongAudioRef.current.load();
+    
+    if (correctAudioRef.current) {
+      correctAudioRef.current.load();
+    }
+    if (wrongAudioRef.current) {
+      wrongAudioRef.current.load();
+    }
 
     return () => {
       if (correctAudioRef.current) {
         correctAudioRef.current.pause();
-        correctAudioRef.current = null;
+        correctAudioRef.current.src = "";
       }
       if (wrongAudioRef.current) {
         wrongAudioRef.current.pause();
-        wrongAudioRef.current = null;
+        wrongAudioRef.current.src = "";
       }
     };
   }, []);
 
   const playSound = (isCorrect: boolean) => {
-    if (isCorrect && correctAudioRef.current) {
-      correctAudioRef.current.play().catch(e => console.error("Error playing sound:", e));
-    } else if (!isCorrect && wrongAudioRef.current) {
-      wrongAudioRef.current.play().catch(e => console.error("Error playing sound:", e));
+    const audioElement = isCorrect ? correctAudioRef.current : wrongAudioRef.current;
+    if (audioElement) {
+      audioElement.currentTime = 0;
+      const playPromise = audioElement.play();
+      if (playPromise) {
+        playPromise.catch((error) => {
+          console.error("Error playing sound:", error);
+        });
+      }
     }
   };
 
   const validateMatrix = (matrixToValidate: number[][]) => {
-    if (!matrixToValidate || matrixToValidate.length === 0) return false;
+    if (data.disabled || isCompleted) return true;
+
+    const newErrors = Array(matrixToValidate.length)
+      .fill(null)
+      .map((_, rIdx) => 
+        Array(matrixToValidate[0]?.length || 0)
+          .fill(false)
+          .map((__, cIdx) => {
+             const userValue = matrixToValidate[rIdx]?.[cIdx] ?? 0;
+             const expectedValue = data.expectedMatrix[rIdx]?.[cIdx] ?? NaN;
+             const tolerance = 0.0001;
+             return Math.abs(userValue - expectedValue) > tolerance;
+          })
+      );
     
-    const tolerance = 0.0001;
-    const newErrors: boolean[][] = [];
+    const allValid = newErrors.every(row => row.every(cellError => !cellError));
+    setErrors(newErrors);
     
-    let isValid = true;
-    for (let i = 0; i < data.expectedMatrix.length; i++) {
-      newErrors[i] = [];
-      for (let j = 0; j < data.expectedMatrix[i].length; j++) {
-        const error = Math.abs(matrixToValidate[i][j] - data.expectedMatrix[i][j]) > tolerance;
-        newErrors[i][j] = error;
-        if (error) isValid = false;
-      }
+    if (allValid) {
+      setIsCompleted(true);
+      data.onComplete?.(id);
     }
     
-    setErrors(newErrors);
-    return isValid;
+    return allValid;
   };
 
   const handleMatrixChange = (newMatrix: number[][]) => {
+    if (data.disabled || isCompleted) return;
     setUserMatrix(newMatrix);
-    
-    if (!isCompleted) {
-      const isValid = validateMatrix(newMatrix);
-      
-      if (isValid) {
-        setIsCompleted(true);
-        playSound(true);
-        if (data.onComplete) {
-          data.onComplete(id);
-        }
-      }
-    }
   };
 
   const resetMatrix = () => {
+    if (data.disabled || isCompleted) return;
     setUserMatrix(initialMatrix());
     setErrors([]);
-    setIsCompleted(false);
-    setShowHint(false);
   };
-  
-  const nodeIsEffectivelyReadonly = data.disabled;
+
+  const nodeIsEffectivelyReadonly = data.disabled && !isCompleted;
   const hasHeadColor = data.headNumber && data.headColor;
 
   return (
     <Card
-      className={`w-[320px] transition-colors duration-300 shadow-xl rounded-lg ${
-        hasHeadColor 
-          ? `bg-${isDark ? 'slate-800' : 'white'} border-${data.headColor?.border}`
-          : isDark 
-            ? "bg-slate-800 border-slate-700" 
-            : "bg-white border-slate-300"
-      }`}
+      className={`min-w-[320px] max-w-[400px] transition-all duration-300 relative ${
+        isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-300"
+      } shadow-xl rounded-lg ${
+        isCompleted
+          ? isDark
+            ? "ring-2 ring-green-500/70"
+            : "ring-2 ring-green-500/80"
+          : data.disabled
+          ? isDark
+            ? "border-slate-600"
+            : "border-slate-200"
+          : ""
+      } ${data.disabled && !isCompleted ? "opacity-70" : ""}`}
       style={{
         borderColor: hasHeadColor ? data.headColor?.border : undefined,
-        borderWidth: hasHeadColor ? '2px' : '1px'
+        borderWidth: hasHeadColor ? '2px' : undefined
       }}
     >
-      <div className="p-4">
-        <div className="text-center mb-3">
-          <div className="flex items-center justify-center gap-2 mb-1">
+      <div className={`p-4 ${data.disabled && !isCompleted ? "pointer-events-none" : ""}`}>
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center gap-2 mb-2">            {isCompleted ? (
+              <Unlock
+                className={`w-5 h-5 ${
+                  isDark ? "text-green-400" : "text-green-500"
+                }`}
+              />
+            ) : (
+              <Calculator
+                className={`w-5 h-5 ${
+                  isDark ? "text-purple-400" : "text-purple-600"
+                }`}
+                style={hasHeadColor ? { color: data.headColor?.primary } : {}}
+              />
+            )}
             <h3
               className={`font-semibold text-lg ${
                 isDark ? "text-slate-100" : "text-slate-800"
@@ -163,6 +186,15 @@ export function CalculationNode({ data, id }: CalculationNodeProps) {
                 Head {data.headNumber}
               </Badge>
             )}
+            {isCompleted && !data.disabled && (
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                <CheckCircle
+                  className={`w-5 h-5 ${
+                    isDark ? "text-green-400" : "text-green-500"
+                  }`}
+                />
+              </motion.div>
+            )}
           </div>
           <p
             className={`text-sm ${
@@ -172,136 +204,122 @@ export function CalculationNode({ data, id }: CalculationNodeProps) {
             {data.description}
           </p>
         </div>
-
         <div
-          className={`p-3 mb-4 rounded-md text-center text-sm font-mono ${
+          className={`mb-4 p-3 border rounded-md text-center transition-colors duration-300 ${
             isDark
-              ? "bg-slate-700/50 text-slate-300"
-              : "bg-slate-100 text-slate-700"
+              ? "bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-slate-700"
+              : "bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-slate-200"
           }`}
+          style={hasHeadColor ? {
+            background: isDark ? `rgba(${parseInt(data.headColor?.primary.slice(1, 3), 16)}, ${parseInt(data.headColor?.primary.slice(3, 5), 16)}, ${parseInt(data.headColor?.primary.slice(5, 7), 16)}, 0.1)` : data.headColor?.secondary,
+            borderColor: `${data.headColor?.border}50`
+          } : {}}
         >
-          {data.formula}
-        </div>        <div className="mb-4">
-          <MatrixInput
-            matrix={userMatrix}
-            onChange={handleMatrixChange}
-            errors={errors}
-            readonly={nodeIsEffectivelyReadonly || isCompleted}
-          />
-        </div>
-
-        <div className="flex justify-between items-center">
-          {data.disabled ? (
-            <div
-              className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
-                isDark
-                  ? "bg-slate-700 text-slate-400"
-                  : "bg-slate-200 text-slate-600"
-              }`}
-            >
-              <Lock className="w-3 h-3" />
-              <span>Locked</span>
-            </div>
-          ) : isCompleted ? (
-            <div
-              className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
-                isDark
-                  ? "bg-green-900/30 text-green-400"
-                  : "bg-green-100 text-green-700"
-              }`}
-            >
-              <CheckCircle2 className="w-3 h-3" />
-              <span>Completed</span>
-            </div>
-          ) : (
-            <div
-              className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded ${
-                isDark
-                  ? "bg-blue-900/30 text-blue-400"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
-              <Unlock className="w-3 h-3" />
-              <span>Unlocked</span>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            {!nodeIsEffectivelyReadonly && !isCompleted && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowHint(!showHint);
-                }}
-                className={`text-xs p-2 h-8 ${
-                  isDark
-                    ? "border-slate-700 hover:bg-slate-700"
-                    : "border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                <Lightbulb
-                  className={`h-3 w-3 mr-1 ${
-                    showHint
-                      ? isDark
-                        ? "text-yellow-300"
-                        : "text-yellow-600"
-                      : isDark
-                      ? "text-slate-400"
-                      : "text-slate-600"
-                  }`}
-                />
-                Hint
-              </Button>
-            )}
-
-            {!nodeIsEffectivelyReadonly && !isCompleted && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetMatrix}
-                className={`text-xs p-2 h-8 ${
-                  isDark
-                    ? "border-slate-700 hover:bg-slate-700"
-                    : "border-slate-300 hover:bg-slate-100"
-                }`}
-              >
-                Reset
-              </Button>
-            )}
+          <div
+            className={`text-lg font-mono ${
+              isDark ? "text-blue-300" : "text-indigo-600"
+            }`}
+            style={hasHeadColor ? { color: data.headColor?.primary } : {}}
+          >
+            {data.formula}
           </div>
         </div>
+        <div className="flex items-center justify-between mb-4 gap-2">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowHint(!showHint)}
+              variant="outline"
+              size="sm"
+              disabled={nodeIsEffectivelyReadonly}
+              className={`flex items-center gap-1 transition-colors duration-150 ${
+                isDark
+                  ? "text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-slate-100 focus-visible:ring-slate-500 disabled:opacity-50"
+                  : "text-slate-600 border-slate-300 hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-slate-400 disabled:opacity-50"
+              }`}
+            >
+              <Lightbulb className="w-3 h-3" />
+              Hint
+            </Button>
+            <Button
+              onClick={resetMatrix}
+              variant="outline"
+              size="sm"
+              disabled={nodeIsEffectivelyReadonly}
+              className={`flex items-center gap-1 transition-colors duration-150 ${
+                isDark
+                  ? "text-slate-300 border-slate-600 hover:bg-slate-700 hover:text-slate-100 focus-visible:ring-slate-500 disabled:opacity-50"
+                  : "text-slate-600 border-slate-300 hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-slate-400 disabled:opacity-50"
+              }`}
+            >
+              Reset
+            </Button>
+          </div>
 
-        {showHint && (
+          <Button
+            onClick={() => {
+              const validationResult = validateMatrix(userMatrix);
+              playSound(validationResult);
+            }}
+            variant="outline"
+            size="sm"
+            disabled={data.disabled && !isCompleted || isCompleted}
+            className={`flex items-center gap-1 transition-colors duration-150 ${
+              isDark
+                ? "text-emerald-300 border-emerald-600 hover:bg-emerald-700 hover:text-emerald-100 focus-visible:ring-emerald-500 disabled:opacity-50"
+                : "text-emerald-600 border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800 focus-visible:ring-emerald-400 disabled:opacity-50"
+            }`}
+          >
+            <CheckCircle2 className="w-3 h-3" />
+            Verify
+          </Button>
+        </div>
+
+        {showHint && (data.disabled ? isCompleted : true) && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className={`mt-3 p-3 text-xs rounded-md ${
+            className={`mb-4 p-3 border rounded-md transition-colors duration-300 ${
               isDark
-                ? "bg-yellow-900/20 text-yellow-200 border border-yellow-900/50"
-                : "bg-yellow-50 text-yellow-800 border border-yellow-200"
+                ? "bg-yellow-900/20 border-yellow-600/30"
+                : "bg-yellow-50 border-yellow-300"
             }`}
           >
-            <p>{data.hint}</p>
+            <p
+              className={`text-sm ${
+                isDark ? "text-yellow-300" : "text-yellow-700"
+              }`}
+            >
+              {data.hint}
+            </p>
           </motion.div>
         )}
 
-        {isCompleted && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={`mt-3 p-3 text-xs rounded-md flex items-center ${
-              isDark
-                ? "bg-green-900/20 text-green-200 border border-green-900/50"
-                : "bg-green-50 text-green-800 border border-green-200"
-            }`}
-          >
-            <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
-            <p>Correct! You can now proceed to the next step.</p>
-          </motion.div>
-        )}
+        <div className="flex justify-center">          <MatrixInput
+            matrix={userMatrix}
+            onChange={handleMatrixChange}
+            errors={errors}
+            readonly={data.disabled && !isCompleted}
+            isCompleted={isCompleted}
+          />
+        </div>        {errors.some((row) => row.some((cell) => cell)) &&
+          !isCompleted &&
+          (data.disabled ? isCompleted : true) && (
+            <div
+              className={`mt-3 p-2 border rounded-md text-center transition-colors duration-300 ${
+                isDark
+                  ? "bg-red-900/20 border-red-600/30"
+                  : "bg-red-50 border-red-300"
+              }`}
+            >
+              <p
+                className={`text-sm ${
+                  isDark ? "text-red-300" : "text-red-600"
+                }`}
+              >
+                Some values are incorrect.
+              </p>
+            </div>
+          )}
       </div>
 
       <Handle

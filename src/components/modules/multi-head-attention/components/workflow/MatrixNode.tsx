@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MatrixDisplay } from "@/components/MatrixDisplay";
 import { useTheme } from "@/contexts/ThemeContext";
+import { motion } from "framer-motion";
 import type { HeadColor, HeadNumber } from "../../utils/types";
 
 interface MatrixNodeProps {
@@ -21,12 +22,14 @@ export function MatrixNode({ data }: MatrixNodeProps) {
   const { isDark } = useTheme();
   const hasHeadColor = data.headNumber && data.headColor;
 
-  return (    <Card
-      className="min-w-[280px] transition-colors duration-300 shadow-xl rounded-lg"
+  return (
+    <Card
+      className={`min-w-[280px] transition-colors duration-300 shadow-xl rounded-lg ${
+        isDark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-300"
+      }`}
       style={{
-        backgroundColor: isDark ? '#1e293b' : 'white',
-        borderColor: hasHeadColor ? data.headColor?.border : (isDark ? '#334155' : '#e2e8f0'),
-        borderWidth: hasHeadColor ? '2px' : '1px'
+        borderColor: hasHeadColor ? data.headColor?.border : undefined,
+        borderWidth: hasHeadColor ? '2px' : undefined
       }}
     >
       <div className="p-4">
